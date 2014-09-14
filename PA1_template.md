@@ -12,7 +12,8 @@ The analysis looks at data collected from a personal activity monitoring device.
 
 Initially we load some libraries that this analysis is going to use:
 
-```{r setup, echo=TRUE}
+
+```r
 library(knitr)
 library(data.table)
 ```
@@ -21,7 +22,8 @@ library(data.table)
 
 First of all we load the data from the .csv file into memory using the read.csv function. This assumes that the unzipped .csv file is in the current working directory:
 
-```{r loadingdata, echo=TRUE}
+
+```r
 movementData <- read.csv("activity.csv", header=TRUE, colClasses=c("numeric","Date","numeric"))
 ```
 
@@ -31,39 +33,69 @@ We create an aggregated variable of steps per day. Looking at the min and max va
 
 The mean and median are calculated using the mean() resp. median() functions and turn out to very close together.
 
-```{r stepsperday, echo=TRUE, results='asis', cache=FALSE}
+
+```r
 spd <- aggregate(steps ~ date, movementData, sum)
 max(spd$steps)
+```
+
+[1] 21194
+
+```r
 min(spd$steps)
+```
+
+[1] 41
+
+```r
 hist(spd$steps,breaks=22, main="Distribution of steps per day",xlab="Steps per day",ylab="Frequency")
+```
+
+![plot of chunk stepsperday](figure/stepsperday.png) 
+
+```r
 mean(spd$steps)
+```
+
+[1] 10766
+
+```r
 median(spd$steps)
 ```
+
+[1] 10765
 
 ## What is the average daily activity pattern?
 
 We create an aggregated variable of steps per time interval and apply the mean function to that. To find the interval with the maximum number of steps, we use which.max.
 
-```{r stepsperinterval, echo=TRUE, results='asis', cache=FALSE}
+
+```r
 spi <- aggregate(movementData$steps, by=list(interval=movementData$interval),FUN=mean,na.rm=TRUE)
 plot(spi,type="l",xlab="Interval Number",ylab="Number of steps (mean)",main="Average Daily Activity Pattern")
+```
+
+![plot of chunk stepsperinterval](figure/stepsperinterval.png) 
+
+```r
 spi_max <- spi[which.max(spi$x),]
 ```
 
-It turns out the `r spi_max$interval`th interval with a mean of `r spi_max$x` steps is the interval with the maximum number of steps.
+It turns out the 835th interval with a mean of 206.1698 steps is the interval with the maximum number of steps.
 
 ## Imputing missing values
 
 Initially we calculate the number of missing values:
 
-```{r missingvalues, echo=TRUE, results='asis', cache=FALSE}
+
+```r
 na_values <- sum(is.na(movementData$steps))
 ```
 
-The number of missing values is `r na_values`.
+The number of missing values is 2304.
 
-Parts 2-4 of this section have not been done yet.
+Part 2-4 of this section have not been done.
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-This section has not been done yet.
+This section has not been done.
