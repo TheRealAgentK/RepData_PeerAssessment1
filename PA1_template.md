@@ -22,6 +22,14 @@ library(data.table)
 ## Warning: package 'data.table' was built under R version 3.1.2
 ```
 
+```r
+library(ggplot2)
+```
+
+```
+## Warning: package 'ggplot2' was built under R version 3.1.3
+```
+
 ## Loading and preprocessing the data
 
 First of all we load the data from the .csv file into memory using the read.csv function. This assumes that the unzipped .csv file is in the current working directory:
@@ -178,15 +186,13 @@ weekend_steps$dayofweek <- rep("weekend", nrow(weekend_steps))
 data_by_weekdays <- rbind(weekend_steps, weekdays_steps)
 data_by_weekdays$dayofweek <- as.factor(data_by_weekdays$dayofweek)
 
-ggplot(data_by_weekdays, aes(x=interval, y=steps)) + 
+ggplot(data_by_weekdays, aes(x=interval, y=x)) + 
   geom_line(color="blue") + 
   facet_wrap(~ dayofweek, nrow=2, ncol=1) +
   labs(x="Interval number", y="Number of steps (mean)")
 ```
 
-```
-## Error: could not find function "ggplot"
-```
+![plot of chunk weekdaysvsweekends](figure/weekdaysvsweekends.png) 
 
 The plot shows that there seems to be a greater amount of general activity on weekends, more uniformly distributed during the day. There are multiple peaks between the values of 100-150 steps per interval and those don't exist on week days. However on week days there is a clearly noticeable peak above 200 steps per interval --- this could be due to a morning exercise regime during the common work week.
 

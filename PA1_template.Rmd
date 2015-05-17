@@ -117,7 +117,7 @@ weekend_steps$dayofweek <- rep("weekend", nrow(weekend_steps))
 data_by_weekdays <- rbind(weekend_steps, weekdays_steps)
 data_by_weekdays$dayofweek <- as.factor(data_by_weekdays$dayofweek)
 
-ggplot(data_by_weekdays, aes(x=interval, y=steps)) + 
+ggplot(data_by_weekdays, aes(x=interval, y=x)) + 
   geom_line(color="blue") + 
   facet_wrap(~ dayofweek, nrow=2, ncol=1) +
   labs(x="Interval number", y="Number of steps (mean)")
