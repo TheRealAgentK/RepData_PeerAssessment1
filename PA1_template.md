@@ -18,6 +18,10 @@ library(knitr)
 library(data.table)
 ```
 
+```
+## Warning: package 'data.table' was built under R version 3.1.2
+```
+
 ## Loading and preprocessing the data
 
 First of all we load the data from the .csv file into memory using the read.csv function. This assumes that the unzipped .csv file is in the current working directory:
@@ -94,8 +98,95 @@ na_values <- sum(is.na(movementData$steps))
 
 The number of missing values is 2304.
 
-Part 2-4 of this section have not been done.
+Next, we deal with the missing values by replacing them with the mean over the same intervalls across the other days. The resulting dataset is then stored in a data table named movementData_fillin:
+
+
+```r
+na_index <- which(is.na(movementData$steps))
+na_replace <- unlist(lapply(na_index, FUN=function(idx){
+  interval = movementData[idx,]$interval
+  spi[spi$interval == interval,]$x
+}))
+
+fillin_steps <- movementData$steps
+fillin_steps[na_index] <- na_replace
+
+movementData_fillin <- data.frame(steps=fillin_steps,date=movementData$date,interval=movementData$interval)
+```
+
+To make sure we haven't made a mistake, we re-run the calculation on how many NAs we have in the new dataset:
+
+
+```r
+na_values_fillin <- sum(is.na(movementData_fillin$steps))
+```
+
+The number of missing values is now 0.
+
+Based on this new dataset a new histogram is created and new values for mean and median are calculated:
+
+
+```r
+spd <- aggregate(steps ~ date, movementData_fillin, sum)
+max(spd$steps)
+```
+
+[1] 21194
+
+```r
+min(spd$steps)
+```
+
+[1] 41
+
+```r
+hist(spd$steps,breaks=22, main="Distribution of steps per day after filling in NA values",xlab="Steps per day",ylab="Frequency")
+```
+
+![plot of chunk stepsperdayagain](figure/stepsperdayagain.png) 
+
+```r
+mean(spd$steps)
+```
+
+[1] 10766
+
+```r
+median(spd$steps)
+```
+
+[1] 10766
+
+The calculation shows that there is no significant change in mean (identical) and median (decreased by one) compared to the original (not filled in) dataset.
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-This section has not been done.
+The code below is splitting the dataset into a weekend and weekdays part each and then creates a comparison plot using ggplot.
+
+```r
+movementData_fillin$weekday <- as.factor(weekdays(movementData_fillin$date))
+weekend_data <- subset(movementData_fillin, weekday %in% c("Saturday","Sunday"))
+weekday_data <- subset(movementData_fillin, !weekday %in% c("Saturday","Sunday"))
+
+# calculate weekday and weekend steps
+weekdays_steps <- aggregate(weekday_data$steps, by=list(interval=weekday_data$interval),FUN=mean, na.rm=T)
+weekend_steps <- aggregate(weekend_data$steps, by=list(interval=weekend_data$interval),FUN=mean, na.rm=T)
+
+weekdays_steps$dayofweek <- rep("weekday", nrow(weekdays_steps))
+weekend_steps$dayofweek <- rep("weekend", nrow(weekend_steps))
+
+data_by_weekdays <- rbind(weekend_steps, weekdays_steps)
+data_by_weekdays$dayofweek <- as.factor(data_by_weekdays$dayofweek)
+
+ggplot(data_by_weekdays, aes(x=interval, y=steps)) + 
+  geom_line(color="blue") + 
+  facet_wrap(~ dayofweek, nrow=2, ncol=1) +
+  labs(x="Interval number", y="Number of steps (mean)")
+```
+
+```
+## Error: could not find function "ggplot"
+```
+
+The plot shows that there seems to be a greater amount of general activity on weekends, more uniformly distributed during the day. There are multiple peaks between the values of 100-150 steps per interval and those don't exist on week days. However on week days there is a clearly noticeable peak above 200 steps per interval --- this could be due to a morning exercise regime during the common work week.
+
